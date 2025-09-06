@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1HfZRezfc5n__xnNi52SxNdQEJHSHpszC
+View your app in AI Studio: https://virtual-room-styler-with-gemini-798380449849.us-west1.run.app/
 
 ## Run Locally
 
