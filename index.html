@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Room Styler with Gemini</title>
+    <link rel="stylesheet" href="index.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/index.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1><i class="fa-solid fa-couch"></i> Virtual Room Styler</h1>
+      <p>
+        Upload a photo of your room, describe what you want to add, and let AI
+        bring your vision to life.
+      </p>
+    </header>
+    <main class="app-container">
+      <div id="image-container">
+        <img
+          id="room-image"
+          src=""
+          alt="Your room will be displayed here"
+          aria-live="polite"
+        />
+        <div id="loading-overlay" class="hidden">
+          <div class="spinner"></div>
+          <p>Styling your room...</p>
+        </div>
+      </div>
+      <div id="controls">
+        <h2>1. Start with a room</h2>
+        <input type="file" id="upload-input" accept="image/*" class="hidden" />
+        <label for="upload-input" id="upload-label" class="button"
+          ><i class="fa-solid fa-upload"></i> Upload Your Image</label
+        >
+        <h2>2. Choose what to add</h2>
+        <div id="product-presets">
+          <button
+            class="preset-btn"
+            data-prompt="Add a modern, comfortable armchair in a neutral color."
+          >
+            <i class="fa-solid fa-chair"></i> Armchair
+          </button>
+          <button
+            class="preset-btn"
+            data-prompt="Place a tall, leafy potted plant in the corner."
+          >
+            <i class="fa-solid fa-leaf"></i> Potted Plant
+          </button>
+          <button
+            class="preset-btn"
+            data-prompt="Add a stylish floor lamp to provide warm lighting."
+          >
+            <i class="fa-solid fa-lightbulb"></i> Floor Lamp
+          </button>
+          <button
+            class="preset-btn"
+            data-prompt="Hang a large, abstract painting on the wall."
+          >
+            <i class="fa-solid fa-image"></i> Wall Art
+          </button>
+        </div>
+        <p class="or-divider"><span>OR</span></p>
+        <textarea
+          id="prompt-input"
+          placeholder="Describe what you want to add, e.g., 'a small wooden coffee table in front of the sofa'"
+          aria-label="Describe what you want to add"
+        ></textarea>
+        <h2>3. Generate your new look</h2>
+        <button id="style-btn" class="button primary-action">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Style My Room
+        </button>
+        <div id="response-text" aria-live="polite"></div>
+      </div>
+    </main>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
