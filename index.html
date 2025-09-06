@@ -31,18 +31,28 @@
           alt="Your room will be displayed here"
           aria-live="polite"
         />
+        <div id="placement-marker" class="hidden"></div>
         <div id="loading-overlay" class="hidden">
           <div class="spinner"></div>
-          <p>Styling your room...</p>
+          <p id="loading-text">Styling your room...</p>
         </div>
       </div>
       <div id="controls">
-        <h2>1. Start with a room</h2>
+        <h2>1. Choose a room</h2>
+        <div id="sample-gallery">
+          <!-- Sample images will be populated here by JS -->
+        </div>
+        <div class="or-divider"><span>OR</span></div>
         <input type="file" id="upload-input" accept="image/*" class="hidden" />
         <label for="upload-input" id="upload-label" class="button"
-          ><i class="fa-solid fa-upload"></i> Upload Your Image</label
+          ><i class="fa-solid fa-upload"></i> Upload Your Own Image</label
         >
+
         <h2>2. Choose what to add</h2>
+        <p class="instruction-text">
+          <i class="fa-solid fa-lightbulb"></i> Tip: Click on the image to place
+          your item!
+        </p>
         <div id="product-presets">
           <button
             class="preset-btn"
@@ -80,6 +90,16 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i> Style My Room
         </button>
         <div id="response-text" aria-live="polite"></div>
+
+        <div id="video-controls" class="hidden">
+          <h2>4. Create a tour</h2>
+          <button id="video-btn" class="button" disabled>
+            <i class="fa-solid fa-film"></i> Generate Video Tour
+          </button>
+          <div id="video-container" class="hidden">
+            <video id="room-video" controls></video>
+          </div>
+        </div>
       </div>
     </main>
     <script type="module" src="/index.tsx"></script>
