@@ -959,8 +959,16 @@ videoButton.addEventListener('click', handleGenerateVideo);
  */
 async function urlToBase64(url: string): Promise<{base64: string; mimeType: string}> {
   try {
+    console.log('Fetching image from:', url);
     const response = await fetch(url);
+    console.log('Response status:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    }
+    
     const blob = await response.blob();
+    console.log('Blob received:', blob.size, 'bytes, type:', blob.type);
     const mimeType = blob.type || 'image/jpeg';
     
     return new Promise((resolve, reject) => {
@@ -968,13 +976,14 @@ async function urlToBase64(url: string): Promise<{base64: string; mimeType: stri
       reader.onload = () => {
         const dataUrl = reader.result as string;
         const base64 = dataUrl.split(',')[1];
+        console.log('Image converted to base64, length:', base64.length);
         resolve({base64, mimeType});
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
   } catch (error) {
-    console.error('Error fetching image:', error);
+    console.error('Error fetching image from', url, ':', error);
     throw error;
   }
 }
@@ -1013,12 +1022,17 @@ async function populateSampleGallery() {
 
 async function initialize() {
   try {
+    console.log('Starting initialization...');
+    console.log('Sample images:', SAMPLES);
+    
     // Populate sample gallery first
     await populateSampleGallery();
+    console.log('Sample gallery populated');
     
     // Load the first sample image
     const firstSample = SAMPLES[0];
     if (firstSample) {
+      console.log('Loading first sample:', firstSample);
       setLoading(true, 'Loading initial sample...');
       const {base64, mimeType} = await urlToBase64(firstSample.url);
       setNewBaseImage(base64, mimeType);
@@ -1026,10 +1040,11 @@ async function initialize() {
         document.querySelector('.sample-item') as HTMLElement,
       );
       setLoading(false);
+      console.log('Initialization complete');
     }
   } catch (error) {
     console.error('Initialization failed:', error);
-    responseText.textContent = 'Could not initialize the application.';
+    responseText.textContent = `Could not load sample images. Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
     setLoading(false);
   }
 }
