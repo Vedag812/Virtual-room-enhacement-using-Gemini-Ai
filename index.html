@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Transform your space with AI-powered interior design. Upload a room photo and visualize stunning design transformations instantly." />
+    <meta name="keywords" content="AI interior design, room styling, home decor, AI design tool, virtual room makeover" />
+    <title>RoomVision - AI Interior Design Studio</title>
+    <link rel="stylesheet" href="index.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/index.css" />
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <header class="app-header">
+      <h1><i class="fa-solid fa-wand-magic-sparkles"></i> DesignLens</h1>
+      <p>
+        Transform your space with AI-powered interior design. Upload a room, visualize stunning transformations, and generate cinematic 3D video tours instantly.
+      </p>
+    </header>
+    <main class="app-container">
+      <!-- Image Section with Action Bar -->
+      <div class="image-section">
+        <!-- Action Bar (Download, Share, Undo/Redo, Zoom) -->
+        <div class="action-bar">
+          <div class="action-group">
+            <button id="undo-btn" class="icon-btn" data-tooltip="Undo (Ctrl+Z)" disabled>
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            <button id="redo-btn" class="icon-btn" data-tooltip="Redo (Ctrl+Y)" disabled>
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+          <div class="action-group">
+            <button id="zoom-in-btn" class="icon-btn" data-tooltip="Zoom In" disabled>
+              <i class="fa-solid fa-magnifying-glass-plus"></i>
+            </button>
+            <button id="zoom-out-btn" class="icon-btn" data-tooltip="Zoom Out" disabled>
+              <i class="fa-solid fa-magnifying-glass-minus"></i>
+            </button>
+            <button id="zoom-reset-btn" class="icon-btn" data-tooltip="Reset Zoom" disabled>
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+          <div class="action-group">
+            <button id="download-btn" class="icon-btn" data-tooltip="Download Image" disabled>
+              <i class="fa-solid fa-download"></i>
+            </button>
+            <button id="share-btn" class="icon-btn" data-tooltip="Share" disabled>
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+            <button id="copy-btn" class="icon-btn" data-tooltip="Copy to Clipboard" disabled>
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Image Container -->
+        <div id="image-container">
+          <div id="before-after-container" class="before-after-container hidden">
+            <div class="before-image-wrapper">
+              <img id="before-image" src="" alt="Original room" />
+              <div class="image-label">BEFORE</div>
+            </div>
+            <div class="after-image-wrapper">
+              <img id="after-image" src="" alt="Styled room" />
+              <div class="image-label">AFTER</div>
+            </div>
+            <div class="comparison-slider" id="comparison-slider">
+              <div class="slider-button">
+                <i class="fa-solid fa-arrows-left-right"></i>
+              </div>
+            </div>
+          </div>
+          <img
+            id="room-image"
+            src=""
+            alt="Your room will be displayed here"
+            aria-live="polite"
+          />
+          <div id="placement-marker" class="hidden"></div>
+          <div id="loading-overlay" class="hidden">
+            <div class="spinner"></div>
+            <p id="loading-text">Styling your room...</p>
+          </div>
+        </div>
+
+        <!-- AI Suggestions Panel -->
+        <div id="ai-suggestions" class="ai-suggestions hidden">
+          <h3><i class="fa-solid fa-lightbulb"></i> AI Style Suggestions</h3>
+          <p class="suggestion-subtitle">Based on your room, we recommend:</p>
+          <div id="suggestions-grid" class="suggestions-grid">
+            <!-- Suggestions will be populated here -->
+          </div>
+        </div>
+
+        <!-- Cost Estimation Panel -->
+        <div id="cost-panel" class="cost-panel hidden">
+          <div class="cost-header">
+            <h3><i class="fa-solid fa-calculator"></i> Cost Estimation</h3>
+            <button id="close-cost-btn" class="icon-btn-small">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+          <div id="cost-content" class="cost-content">
+            <!-- Cost breakdown will be populated here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Sidebar -->
+      <div id="controls">
+        <h2><i class="fa-solid fa-1"></i> Choose a Sample Room</h2>
+        <p class="instruction-text">
+          <i class="fa-solid fa-info-circle"></i> Select from our curated room samples or upload your own image
+        </p>
+        <div id="sample-gallery">
+          <!-- Sample images will be populated here by JS -->
+        </div>
+        <div class="or-divider"><span>OR</span></div>
+        <input type="file" id="upload-input" accept="image/*" class="hidden" />
+        <label for="upload-input" id="upload-label" class="button"
+          ><i class="fa-solid fa-cloud-upload-alt"></i> Upload Your Own Image</label
+        >
+
+        <!-- Design Section -->
+        <div class="control-section">
+          <h2><i class="fa-solid fa-palette"></i> Design Your Space</h2>
+          <p class="instruction-text">
+            <i class="fa-solid fa-mouse-pointer"></i> Click on the room to place items
+          </p>
+          
+          <!-- Quick Presets -->
+          <div id="product-presets">
+            <button class="preset-btn" data-prompt="Add a modern, comfortable armchair in a neutral color.">
+              <i class="fa-solid fa-chair"></i> <span>Armchair</span>
+            </button>
+            <button class="preset-btn" data-prompt="Place a tall, leafy potted plant in the corner.">
+              <i class="fa-solid fa-leaf"></i> <span>Plant</span>
+            </button>
+            <button class="preset-btn" data-prompt="Add a stylish floor lamp to provide warm lighting.">
+              <i class="fa-solid fa-lightbulb"></i> <span>Lamp</span>
+            </button>
+            <button class="preset-btn" data-prompt="Hang a large, abstract painting on the wall.">
+              <i class="fa-solid fa-image"></i> <span>Wall Art</span>
+            </button>
+          </div>
+          
+          <!-- Custom Prompt -->
+          <div class="or-divider"><span>OR</span></div>
+          <textarea
+            id="prompt-input"
+            placeholder="Describe your design vision... (e.g., 'Add a modern gray sectional sofa')"
+            aria-label="Describe what you want to add"
+          ></textarea>
+        </div>
+
+        <!-- Before/After Comparison -->
+        <div class="control-section" id="before-after-section">
+          <h2><i class="fa-solid fa-code-compare"></i> Before & After</h2>
+          <p class="instruction-text">
+            <i class="fa-solid fa-arrows-left-right"></i> Compare original vs styled room
+          </p>
+          <button id="toggle-comparison-btn" class="button secondary-action" disabled>
+            <i class="fa-solid fa-sliders-h"></i> Show Comparison
+          </button>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="control-section">
+          <button id="style-btn" class="button primary-action">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Transform Room
+          </button>
+          <button id="get-suggestions-btn" class="button secondary-action">
+            <i class="fa-solid fa-lightbulb"></i> Get AI Suggestions
+          </button>
+          <button id="estimate-cost-btn" class="button secondary-action" disabled>
+            <i class="fa-solid fa-calculator"></i> Estimate Cost
+          </button>
+          <div id="response-text" aria-live="polite"></div>
+        </div>
+
+        <!-- Video Tour Section -->
+        <div id="video-controls" class="control-section hidden">
+          <h2><i class="fa-solid fa-video"></i> Create Video Tour</h2>
+          <p class="instruction-text">
+            <i class="fa-solid fa-clapperboard"></i> Generate a cinematic 3D walkthrough
+          </p>
+          <button id="video-btn" class="button" disabled>
+            <i class="fa-solid fa-film"></i> Generate Video Tour
+          </button>
+          <div id="video-container" class="hidden">
+            <video id="room-video" controls></video>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+      <i class="fa-solid fa-check-circle"></i>
+      <span id="toast-message">Success!</span>
+    </div>
+
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

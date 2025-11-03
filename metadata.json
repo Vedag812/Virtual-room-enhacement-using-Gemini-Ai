@@ -1,0 +1,6 @@
+{
+  "name": "Virtual Room Styler with Gemini",
+  "description": "Use AI to place furniture and decor in your room. Upload a photo of your room, describe what you want to add, and let Gemini bring your vision to life.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
