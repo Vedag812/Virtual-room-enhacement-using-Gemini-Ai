@@ -115,6 +115,19 @@ let translateY: number = 0;
 let isComparisonMode: boolean = false;
 let sliderPosition: number = 50; // percentage
 
+// People upload state
+interface PersonPhoto {
+  id: string;
+  base64: string;
+  mimeType: string;
+}
+let peoplePhotos: PersonPhoto[] = [];
+
+// People upload DOM references
+const peopleUploadInput = document.getElementById('people-upload-input') as HTMLInputElement;
+const peopleGallery = document.getElementById('people-gallery') as HTMLDivElement;
+const addPeopleButton = document.getElementById('add-people-btn') as HTMLButtonElement;
+
 // --- GEMINI API INITIALIZATION ---
 const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
 
@@ -385,6 +398,9 @@ function setNewBaseImage(base64: string, mimeType: string) {
     beforeAfterContainer.classList.add('hidden');
     toggleComparisonBtn.innerHTML = '<i class="fa-solid fa-sliders-h"></i> Show Comparison';
   }
+  
+  // Update add people button state
+  updateAddPeopleButton();
   
   // Update action buttons (enable zoom, disable cost)
   updateActionButtons();
@@ -731,31 +747,33 @@ async function handleStyleRoom() {
     });
 
     let foundImage = false;
-    for (const part of response.candidates[0].content.parts) {
-      if (part.text) {
-        responseText.textContent = part.text;
-      } else if (part.inlineData) {
-        const {data, mimeType} = part.inlineData;
-        // Update current image to show the styled result
-        currentImageBase64 = data;
-        currentMimeType = mimeType;
-        updateRoomImage(data, mimeType);
+    if (response?.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.text) {
+          responseText.textContent = part.text;
+        } else if (part.inlineData) {
+          const {data, mimeType} = part.inlineData;
+          // Update current image to show the styled result
+          currentImageBase64 = data;
+          currentMimeType = mimeType;
+          updateRoomImage(data, mimeType);
 
-        // Store the styled image separately for comparison and undo/redo
-        lastStyledImageBase64 = data;
-        lastStyledMimeType = mimeType;
-        
-        // Add to history for undo/redo
-        addToHistory(data, mimeType);
-        
-        // Update action buttons
-        updateActionButtons();
-        
-        videoControls.classList.remove('hidden');
-        videoButton.disabled = false;
-        foundImage = true;
-        
-        showToast('Room styled successfully!');
+          // Store the styled image separately for comparison and undo/redo
+          lastStyledImageBase64 = data;
+          lastStyledMimeType = mimeType;
+          
+          // Add to history for undo/redo
+          addToHistory(data, mimeType);
+          
+          // Update action buttons
+          updateActionButtons();
+          
+          videoControls.classList.remove('hidden');
+          videoButton.disabled = false;
+          foundImage = true;
+          
+          showToast('Room styled successfully!');
+        }
       }
     }
     if (!foundImage) {
@@ -1020,6 +1038,169 @@ async function populateSampleGallery() {
   }
 }
 
+// --- PEOPLE UPLOAD FUNCTIONS ---
+
+/**
+ * Handle people photo uploads
+ */
+peopleUploadInput.addEventListener('change', async (e) => {
+  const files = (e.target as HTMLInputElement).files;
+  if (!files || files.length === 0) return;
+
+  for (const file of Array.from(files)) {
+    try {
+      const {base64, mimeType} = await fileToBase64(file);
+      const person: PersonPhoto = {
+        id: `person-${Date.now()}-${Math.random()}`,
+        base64,
+        mimeType,
+      };
+      
+      peoplePhotos.push(person);
+      addPersonToGallery(person);
+    } catch (error) {
+      console.error('Error loading person photo:', error);
+      showToast('Error loading photo');
+    }
+  }
+
+  // Enable the add people button if there are photos and a room image
+  updateAddPeopleButton();
+  
+  // Clear the input so the same file can be uploaded again
+  peopleUploadInput.value = '';
+});
+
+/**
+ * Add a person photo to the gallery
+ */
+function addPersonToGallery(person: PersonPhoto) {
+  const item = document.createElement('div');
+  item.classList.add('people-item');
+  item.dataset.personId = person.id;
+
+  const img = document.createElement('img');
+  img.src = `data:${person.mimeType};base64,${person.base64}`;
+  img.alt = 'Person photo';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.classList.add('remove-person-btn');
+  removeBtn.innerHTML = '<i class="fa-solid fa-times"></i>';
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    removePerson(person.id);
+  });
+
+  item.appendChild(img);
+  item.appendChild(removeBtn);
+  peopleGallery.appendChild(item);
+}
+
+/**
+ * Remove a person from the gallery
+ */
+function removePerson(personId: string) {
+  peoplePhotos = peoplePhotos.filter(p => p.id !== personId);
+  const item = peopleGallery.querySelector(`[data-person-id="${personId}"]`);
+  if (item) {
+    item.remove();
+  }
+  updateAddPeopleButton();
+}
+
+/**
+ * Update the add people button state
+ */
+function updateAddPeopleButton() {
+  addPeopleButton.disabled = peoplePhotos.length === 0 || !currentImageBase64;
+}
+
+/**
+ * Handle adding people to the room
+ */
+addPeopleButton.addEventListener('click', async () => {
+  if (peoplePhotos.length === 0 || !currentImageBase64 || !currentMimeType) {
+    showToast('Please upload people photos and select a room');
+    return;
+  }
+
+  setLoading(true, 'Adding people to your room...');
+  
+  try {
+    // Create a prompt describing the people to add
+    const peopleDescriptions = peoplePhotos.map((_, i) => 
+      `person ${i + 1} in a natural, realistic pose`
+    ).join(', ');
+    
+    const prompt = `Add ${peopleDescriptions} to this room interior. Place them naturally in the space, maintaining realistic proportions and lighting. Ensure they blend seamlessly with the room's aesthetic and lighting conditions. Make it look like a professional interior photography shot with people enjoying the space.`;
+
+    // Prepare the image parts - room + people photos
+    const imageParts = [
+      {
+        inlineData: {
+          data: currentImageBase64,
+          mimeType: currentMimeType,
+        },
+      },
+      ...peoplePhotos.map(person => ({
+        inlineData: {
+          data: person.base64,
+          mimeType: person.mimeType,
+        },
+      })),
+      {
+        text: prompt,
+      },
+    ];
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image-preview',
+      contents: {
+        parts: imageParts,
+      },
+      config: {
+        responseModalities: [Modality.IMAGE, Modality.TEXT],
+      },
+    });
+
+    let foundImage = false;
+    if (response?.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.text) {
+          responseText.textContent = part.text;
+        } else if (part.inlineData) {
+          const styledBase64 = part.inlineData.data;
+          const styledMimeType = part.inlineData.mimeType;
+          foundImage = true;
+
+          // Update the image
+          currentImageBase64 = styledBase64;
+          currentMimeType = styledMimeType;
+          lastStyledImageBase64 = styledBase64;
+          lastStyledMimeType = styledMimeType;
+          updateRoomImage(styledBase64, styledMimeType);
+          addToHistory(styledBase64, styledMimeType);
+          updateActionButtons();
+
+          showToast('People added successfully!');
+        }
+      }
+    }
+    
+    if (!foundImage) {
+      throw new Error('No valid image received from AI.');
+    }
+  } catch (error: any) {
+    console.error('Error adding people:', error);
+    responseText.textContent = `Error: ${error.message || 'Could not add people. Please try again.'}`;
+    showToast('Failed to add people');
+  } finally {
+    setLoading(false);
+  }
+});
+
+// --- SAVED DESIGNS FEATURE REMOVED ---
+
 async function initialize() {
   try {
     console.log('Starting initialization...');
@@ -1042,6 +1223,7 @@ async function initialize() {
       setLoading(false);
       console.log('Initialization complete');
     }
+    
   } catch (error) {
     console.error('Initialization failed:', error);
     responseText.textContent = `Could not load sample images. Error: ${error instanceof Error ? error.message : 'Unknown error'}`;

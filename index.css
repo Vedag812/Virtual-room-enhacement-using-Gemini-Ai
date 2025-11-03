@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Minimalist Light Theme */
+  /* Clean Minimalist Light Theme */
   --background-color: #f8fafc;
   --surface-color: #ffffff;
   --surface-hover: #f1f5f9;
@@ -18,10 +18,10 @@
   --border-hover: #cbd5e1;
   
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.18);
   
-  /* Shadows */
+  /* Subtle Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
@@ -42,6 +42,34 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-full: 9999px;
+  
+  /* Smooth Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Subtle Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 * {
@@ -61,11 +89,12 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 .app-header {
   text-align: center;
-  padding: var(--spacing-2xl) var(--spacing-md);
+  padding: 1.5rem 1rem;
   background: var(--surface-color);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -77,30 +106,18 @@ body {
 }
 
 .app-header h1 {
-  margin: 0 0 var(--spacing-sm) 0;
+  margin: 0 0 0.5rem 0;
   color: var(--text-color);
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-}
-
-.app-header h1 i {
-  color: var(--primary-color);
   font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .app-header p {
   margin: 0;
   color: var(--text-secondary-color);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.5;
   font-weight: 400;
 }
 
@@ -333,6 +350,81 @@ body {
 .sample-item.selected {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* People Gallery */
+.people-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--surface-hover);
+  border-radius: var(--radius-lg);
+  min-height: 120px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.people-gallery:empty::before {
+  content: 'No people photos uploaded yet';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: var(--text-muted-color);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.people-item {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  background: var(--surface-color);
+  aspect-ratio: 1 / 1;
+  transition: all 0.2s ease;
+}
+
+.people-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.people-item:hover {
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.people-item .remove-person-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.people-item:hover .remove-person-btn {
+  opacity: 1;
+}
+
+.people-item .remove-person-btn:hover {
+  background: rgba(220, 38, 38, 1);
 }
 
 .hidden {

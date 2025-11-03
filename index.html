@@ -20,10 +20,8 @@
 </head>
   <body>
     <header class="app-header">
-      <h1><i class="fa-solid fa-wand-magic-sparkles"></i> DesignLens</h1>
-      <p>
-        Transform your space with AI-powered interior design. Upload a room, visualize stunning transformations, and generate cinematic 3D video tours instantly.
-      </p>
+      <h1>RoomVision</h1>
+      <p>AI-powered interior design tool</p>
     </header>
     <main class="app-container">
       <!-- Image Section with Action Bar -->
@@ -160,6 +158,28 @@
             placeholder="Describe your design vision... (e.g., 'Add a modern gray sectional sofa')"
             aria-label="Describe what you want to add"
           ></textarea>
+        </div>
+
+        <!-- Add People Section -->
+        <div class="control-section">
+          <h2><i class="fa-solid fa-users"></i> Add People to Room</h2>
+          <p class="instruction-text">
+            <i class="fa-solid fa-info-circle"></i> Upload photos of people to place in your room
+          </p>
+          
+          <input type="file" id="people-upload-input" accept="image/*" multiple class="hidden" />
+          <label for="people-upload-input" class="button secondary-action">
+            <i class="fa-solid fa-user-plus"></i> Upload People Photos
+          </label>
+          
+          <!-- People Gallery -->
+          <div id="people-gallery" class="people-gallery">
+            <!-- Uploaded people photos will appear here -->
+          </div>
+          
+          <button id="add-people-btn" class="button" disabled style="margin-top: 1rem;">
+            <i class="fa-solid fa-user-check"></i> Place People in Room
+          </button>
         </div>
 
         <!-- Before/After Comparison -->
